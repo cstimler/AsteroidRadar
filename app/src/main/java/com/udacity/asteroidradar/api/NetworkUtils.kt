@@ -1,8 +1,17 @@
 package com.udacity.asteroidradar.api
 
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
+import kotlinx.coroutines.Deferred
 import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Url
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -55,3 +64,47 @@ private fun getNextSevenDaysFormattedDates(): ArrayList<String> {
 
     return formattedDateList
 }
+
+public val startDate = Date()
+public val endDate = Date()
+private val myBaseUrl = "https://api.nasa.gov/neo/rest/v1"
+
+val urlString = myBaseUrl + "feed?start_date=" + startDate.toString() + "&end_date=" + endDate.toString() +
+        "&api_key=" + apiKey.API_KEY
+
+fun createDateUrlExtension(): String {
+    return "feed?start_date=" + startDate.toString() + "&end_date=" + endDate.toString() +
+            "&api_key=" + apiKey.API_KEY
+}
+
+interface AsteroidService {
+    @GET
+    fun getAsteroidList(@Url urlString: String): Deferred<NetworkAsteroidContainer>
+}
+
+
+private val moshi = Moshi.Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
+
+object NetworkScalar {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.nasa.gov/neo/rest/v1")
+        .addConverterFactory(ScalarsConverterFactory.create())
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .build()
+
+    val asterScalar = retrofit.create(AsteroidService::class.java)
+}
+
+object NetworkMoshi {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.nasa.gov/neo/rest/v1")
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
+        .build()
+
+    val asterMoshi = retrofit.create(AsteroidService::class.java)
+}
+
+
