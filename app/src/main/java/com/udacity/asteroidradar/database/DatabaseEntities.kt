@@ -18,6 +18,7 @@ data class DatabaseAsteroids constructor(
     val distanceFromEarth: Double,
     val isPotentiallyHazardous: Boolean)
 
+
 fun List<DatabaseAsteroids>.asDomainModel(): List<Asteroid> {
     return map {
         Asteroid(

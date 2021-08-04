@@ -10,7 +10,7 @@ interface AsteroidDao {
     fun getAsteroids(): LiveData<List<DatabaseAsteroids>>
 
     @Insert(onConflict=OnConflictStrategy.REPLACE)
-    fun insertAll(vararg videos: DatabaseAsteroids)
+    fun insertAll(vararg asteroids: DatabaseAsteroids)
 }
 
 @Database(entities = [DatabaseAsteroids::class], version = 1)

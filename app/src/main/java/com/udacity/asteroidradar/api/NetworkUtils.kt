@@ -1,11 +1,14 @@
 package com.udacity.asteroidradar.api
 
+import android.media.Image
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -16,7 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
+fun parseAsteroidsJsonResult(jsonResult: JSONObject): List<Asteroid> {
     val nearEarthObjectsJson = jsonResult.getJSONObject("near_earth_objects")
 
     val asteroidList = ArrayList<Asteroid>()
@@ -79,7 +82,12 @@ fun createDateUrlExtension(): String {
 
 interface AsteroidService {
     @GET
-    fun getAsteroidList(@Url urlString: String): Deferred<NetworkAsteroidContainer>
+    fun getAsteroidsFromNetwork(@Url temp: String): Deferred<JSONObject>
+}
+
+interface NASAPhotoService {
+    @GET
+    fun getPhotoData(): Deferred<NetworkPhotoData>
 }
 
 
@@ -99,12 +107,18 @@ object NetworkScalar {
 
 object NetworkMoshi {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.nasa.gov/neo/rest/v1")
+        .baseUrl("https://api.nasa.gov/planetary/apod?api_key=KEY")
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .build()
 
-    val asterMoshi = retrofit.create(AsteroidService::class.java)
+    val asterMoshi = retrofit.create(NASAPhotoService::class.java)
+}
+
+suspend fun refreshPhotoData() {
+    withContext(Dispatchers.IO) {
+        val photoData = NetworkMoshi.asterMoshi.getPhotoData().await()
+    }
 }
 
 
