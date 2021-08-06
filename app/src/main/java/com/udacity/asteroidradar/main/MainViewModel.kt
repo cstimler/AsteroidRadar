@@ -2,10 +2,7 @@ package com.udacity.asteroidradar.main
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.database.getDatabase
 import com.udacity.asteroidradar.repository.AsteroidsRepository
@@ -43,6 +40,17 @@ class MainViewModel(application: Application) : ViewModel() {
     fun displayAsteroidDetailsComplete() {
         _navigateToSelectedAsteroid.value = null
     }
+
+    class Factory(val app: Application) : ViewModelProvider.Factory {
+        @Suppress("unchecked_cast")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+                return MainViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
+    }
+
 
 
 }

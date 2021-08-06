@@ -3,6 +3,7 @@ package com.udacity.asteroidradar.api
 import com.squareup.moshi.JsonClass
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.database.DatabaseAsteroids
+import org.json.JSONObject
 
 @JsonClass(generateAdapter = true)
 data class NetworkAsteroidContainer(val asteroids: List<NetworkAsteroid>)
@@ -29,6 +30,8 @@ data class NetworkPhotoData(
     val title: String
 )
 
+@JsonClass(generateAdapter = true)
+data class NearEarthObjectsJson(val near_earth_objects: String)
 
 fun NetworkAsteroidContainer.asDomainModel(): List<Asteroid> {
     return asteroids.map {

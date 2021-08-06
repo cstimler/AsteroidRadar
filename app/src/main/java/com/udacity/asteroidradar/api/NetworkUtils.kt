@@ -54,6 +54,42 @@ fun parseAsteroidsJsonResult(jsonResult: JSONObject): List<Asteroid> {
     return asteroidList
 }
 
+// This function starts with the object at "nearEarthObjectsJson":
+fun modifiedParseAsteroidsJsonResult(jsonResult: JSONObject) : List<Asteroid> {
+    val nearEarthObjectsJson = jsonResult
+
+    val asteroidList = ArrayList<Asteroid>()
+
+    val nextSevenDaysFormattedDates = getNextSevenDaysFormattedDates()
+    for (formattedDate in nextSevenDaysFormattedDates) {
+        val dateAsteroidJsonArray = nearEarthObjectsJson.getJSONArray(formattedDate)
+
+        for (i in 0 until dateAsteroidJsonArray.length()) {
+            val asteroidJson = dateAsteroidJsonArray.getJSONObject(i)
+            val id = asteroidJson.getLong("id")
+            val codename = asteroidJson.getString("name")
+            val absoluteMagnitude = asteroidJson.getDouble("absolute_magnitude_h")
+            val estimatedDiameter = asteroidJson.getJSONObject("estimated_diameter")
+                .getJSONObject("kilometers").getDouble("estimated_diameter_max")
+
+            val closeApproachData = asteroidJson
+                .getJSONArray("close_approach_data").getJSONObject(0)
+            val relativeVelocity = closeApproachData.getJSONObject("relative_velocity")
+                .getDouble("kilometers_per_second")
+            val distanceFromEarth = closeApproachData.getJSONObject("miss_distance")
+                .getDouble("astronomical")
+            val isPotentiallyHazardous = asteroidJson
+                .getBoolean("is_potentially_hazardous_asteroid")
+
+            val asteroid = Asteroid(id, codename, formattedDate, absoluteMagnitude,
+                estimatedDiameter, relativeVelocity, distanceFromEarth, isPotentiallyHazardous)
+            asteroidList.add(asteroid)
+        }
+    }
+
+    return asteroidList
+}
+
 private fun getNextSevenDaysFormattedDates(): ArrayList<String> {
     val formattedDateList = ArrayList<String>()
 
@@ -82,7 +118,7 @@ fun createDateUrlExtension(): String {
 
 interface AsteroidService {
     @GET
-    fun getAsteroidsFromNetwork(@Url temp: String): Deferred<JSONObject>
+    fun getAsteroidsFromNetwork(@Url temp: String): Deferred<String>
 }
 
 interface NASAPhotoService {
@@ -97,7 +133,7 @@ private val moshi = Moshi.Builder()
 
 object NetworkScalar {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.nasa.gov/neo/rest/v1")
+        .baseUrl("https://api.nasa.gov/neo/rest/v1/")
         .addConverterFactory(ScalarsConverterFactory.create())
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
