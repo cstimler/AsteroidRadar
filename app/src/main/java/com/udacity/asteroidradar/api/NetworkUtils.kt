@@ -1,6 +1,7 @@
 package com.udacity.asteroidradar.api
 
 import android.media.Image
+import android.util.Log
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -100,7 +101,7 @@ private fun getNextSevenDaysFormattedDates(): ArrayList<String> {
         formattedDateList.add(dateFormat.format(currentTime))
         calendar.add(Calendar.DAY_OF_YEAR, 1)
     }
-
+    Log.i("CHARLES: CALENDAR", formattedDateList.toString())
     return formattedDateList
 }
 

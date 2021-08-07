@@ -1,5 +1,6 @@
 package com.udacity.asteroidradar.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.udacity.asteroidradar.Asteroid
@@ -22,7 +23,7 @@ class AsteroidsRepository(private val database: AsteroidsDatabase) {
 
     val urlString = myBaseUrl + "feed?start_date=" + startDate.toString() + "&end_date=" + endDate.toString() +
             "&api_key=" + apiKey.API_KEY
-    val urlStringTemp = myBaseUrl + "feed?start_date=2021-05-05" + "&end_date=2021-05-07" + "&api_key=" + apiKey.API_KEY
+    val urlStringTemp = myBaseUrl + "feed?start_date=2021-08-06" + "&end_date=2021-08-13" + "&api_key=" + apiKey.API_KEY
 
     val asteroids: LiveData<List<Asteroid>> = Transformations.map(database.asteroidDao.getAsteroids()) {
         it.asDomainModel()
@@ -30,11 +31,17 @@ class AsteroidsRepository(private val database: AsteroidsDatabase) {
 
  //   val asteroidlist:
     suspend fun refreshAsteroids() {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO)
+        {
+            Log.i("CHARLES: Entered", "Yaah!")
+          //  Log.i("CHARLES: Url String", urlStringTemp)
             val temp = NetworkScalar.asterScalar.getAsteroidsFromNetwork(urlStringTemp).await()
            // val temp2 = temp.near_earth_objects
+          //  Log.i("CHARLES: String", temp)
             val temp3 = JSONObject(temp)
-            val asteroidlist = modifiedParseAsteroidsJsonResult(temp3)
+            // Log.i("CHARLES: JSON", temp3.toString())
+            val asteroidlist = parseAsteroidsJsonResult(temp3)
+            Log.i("CHARLES: LIST", asteroidlist.toString())
             database.asteroidDao.insertAll(*AsteroidContainer(asteroidlist).asDatabaseModel())
         }
     }
