@@ -24,11 +24,12 @@
 
             <ImageView
                 android:id="@+id/activity_main_image_of_the_day"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/placeholder_picture_of_day"/>
+                android:contentDescription="@string/description"
+                app:srcCompat="@drawable/ic_status_potentially_hazardous"/>
 
             <TextView
                 android:id="@+id/textView"

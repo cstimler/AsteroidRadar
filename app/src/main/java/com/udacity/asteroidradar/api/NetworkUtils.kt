@@ -123,7 +123,7 @@ interface AsteroidService {
 }
 
 interface NASAPhotoService {
-    @GET
+    @GET("apod?api_key=" + apiKey.API_KEY )
     fun getPhotoData(): Deferred<NetworkPhotoData>
 }
 
@@ -144,7 +144,7 @@ object NetworkScalar {
 
 object NetworkMoshi {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.nasa.gov/planetary/apod?api_key=KEY")
+        .baseUrl("https://api.nasa.gov/planetary/")
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .build()

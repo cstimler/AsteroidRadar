@@ -25,7 +25,7 @@ data class NetworkAsteroid(
 
 @JsonClass(generateAdapter = true)
 data class NetworkPhotoData(
-    val urlString: String,
+    val url: String,
     val media_type: String,
     val title: String
 )
