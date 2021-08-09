@@ -13,9 +13,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
+import com.udacity.asteroidradar.database.asDomainModel
 import com.udacity.asteroidradar.database.getDatabase
 import java.net.ConnectException
 import java.net.SocketTimeoutException
+import java.util.*
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -29,9 +31,26 @@ class MainViewModel(application: Application) : ViewModel() {
 
     var imageTitle = ""
 
-    val asteroids: LiveData<List<Asteroid>>
+    // val asteroids: LiveData<List<Asteroid>>
 
-    get() = _asteroids
+    // took this out of AsteroidsRepository:
+
+    val weekAsteroids: LiveData<List<Asteroid>> = Transformations.map(database.asteroidDao.getAsteroids()) {
+        it.asDomainModel()
+    }
+    // Log.i("CHARLES in Repository", "getAsteroids")
+
+
+    val todaysAsteroids: LiveData<List<Asteroid>> = Transformations.map(database.asteroidDao.getTodaysAsteroids()) {
+        it.asDomainModel()
+    }
+
+
+    val allSavedAsteroids: LiveData<List<Asteroid>> = Transformations.map(database.asteroidDao.getAllSavedAsteroids()) {
+        it.asDomainModel()
+    }
+
+
 
     private val _readyToDownloadPicasso = MutableLiveData<Boolean>()
 
@@ -54,17 +73,43 @@ class MainViewModel(application: Application) : ViewModel() {
         }
     }
 
+    private val _dataHasUpdated = MutableLiveData<Boolean>()
+    val dataHasUpdated: LiveData<Boolean>
+    get() = _dataHasUpdated
 
+    var asteroidRetrievedList2: LiveData<List<Asteroid>>? = todaysAsteroids
+    var asteroidRetrievedList: MutableLiveData<List<Asteroid>>? = weekAsteroids as MutableLiveData<List<Asteroid>>
+    var asteroidRetrievedList1: LiveData<List<Asteroid>>? = weekAsteroids
 
-    var asteroidRetrievedList: MutableLiveData<List<Asteroid>> = asteroidsRepository.weekAsteroids as MutableLiveData<List<Asteroid>>
+    var asteroidRetriedList3: LiveData<List<Asteroid>>? = allSavedAsteroids
 
+    /*
     fun chooseList(int: Int) {
-        asteroidRetrievedList = when (int) {
-        1 -> asteroidsRepository.weekAsteroids as MutableLiveData<List<Asteroid>>
-            2 -> asteroidsRepository.todaysAsteroids as MutableLiveData<List<Asteroid>>
-            3 -> asteroidsRepository.allSavedAsteroids as MutableLiveData<List<Asteroid>>
-            else -> asteroidsRepository.weekAsteroids as MutableLiveData<List<Asteroid>>
+        asteroidRetrievedList?.value = when (int) {
+            1 -> asteroidRetrievedList1?.value
+            2 -> asteroidRetrievedList2?.value
+            3 -> asteroidRetriedList3?.value
+            else -> asteroidRetrievedList2?.value
     }
+        Log.i("CHARLES int value", int.toString())
+        announceDataHasUpdated()
+        Log.i("CHARLES BETTER BE variable", asteroidRetrievedList?.value.toString())
+        Log.i("CHARLES BETTER BE week", asteroidRetrievedList1?.value.toString())
+        Log.i("CHARLES BETTER BE todays", asteroidRetrievedList2?.value.toString())
+        Log.i("CHARLES BETTER BE allSaved", asteroidRetriedList3?.value.toString())
+        Log.i("CHARLES ANOTHER today's list", asteroidsRepository.todaysAsteroids.value.toString())
+
+        //(source)
+    }
+
+     */
+
+    fun announceDataHasUpdated() {
+        _dataHasUpdated.value = true
+    }
+
+    fun announceDataUpdateIsOver() {
+        _dataHasUpdated.value = false
     }
 
     private val _navigateToSelectedAsteroid = MutableLiveData<Asteroid>()
@@ -96,10 +141,13 @@ class MainViewModel(application: Application) : ViewModel() {
     fun refreshPhotoOfTheDay()  {
         viewModelScope.launch {
             try {
+                Log.i("CHARLES in refresh", "just entered")
                 val temp = NetworkMoshi.asterMoshi.getPhotoData().await()
+                Log.i("CHARLES in refresh2", "got past val temp")
                 picUrl2 = temp.url
                 imageTitle = temp.title
                 timeToDownloadPicasso()
+                Log.i("CHARLES after timeto..", picUrl2)
             } catch (e: Exception) {
                 timeToDownloadPicasso()
                 Log.i("CHARLES: Exception", "$e.printStackTrace()")
