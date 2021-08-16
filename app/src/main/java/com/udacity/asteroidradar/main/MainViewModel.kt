@@ -6,17 +6,19 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
-import com.udacity.asteroidradar.api.NetworkMoshi
-import com.udacity.asteroidradar.api.apiKey
 import com.udacity.asteroidradar.repository.AsteroidsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
+import com.udacity.asteroidradar.api.*
 import com.udacity.asteroidradar.database.asDomainModel
 import com.udacity.asteroidradar.database.getDatabase
+import org.json.JSONObject
 import java.net.ConnectException
 import java.net.SocketTimeoutException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -68,8 +70,15 @@ class MainViewModel(application: Application) : ViewModel() {
     private val asteroidsRepository = AsteroidsRepository(database)
 
     init {
-        viewModelScope.launch {
-            asteroidsRepository.refreshAsteroids()
+       getAsteroidsFromNetworkNow()
+        }
+
+
+
+    fun getAsteroidsFromNetworkNow() {
+        viewModelScope.launch()
+        {
+            refreshAsteroids()
         }
     }
 
@@ -137,6 +146,12 @@ class MainViewModel(application: Application) : ViewModel() {
     }
  */
 
+    // Moving more stuff in from the AsteroidsRepository:
+
+
+
+
+
 
     fun refreshPhotoOfTheDay()  {
         viewModelScope.launch {
@@ -167,4 +182,41 @@ class MainViewModel(application: Application) : ViewModel() {
 
 
 
+
+
+    // Moving stuff in from AsteroidRepository:
+
+    private val myBaseUrl = "https://api.nasa.gov/neo/rest/v1/"
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun refreshAsteroids() {
+        withContext(Dispatchers.IO)
+        {
+            val urlStringTemp = getUrlStringTemp()
+            Log.i("CHARLES: Url String", urlStringTemp)
+            try {
+                val temp = NetworkScalar.asterScalar.getAsteroidsFromNetwork(urlStringTemp).await()
+                Log.i("CHARLES:", "Loading Asteroids Success")
+                val temp1 = JSONObject(temp)
+                val asteroidlist = parseAsteroidsJsonResult(temp1)
+                database.asteroidDao.insertAll(*AsteroidContainer(asteroidlist).asDatabaseModel())
+            } catch (e: java.lang.Exception) {
+                Log.i("CHARLES: exception", "Exception when loading asteroids")
+                Log.i("CHARLES: refreshAsteroids exception", e.toString())
+            }
+        }
+    }
+
+// some of below adapted from https://www.programiz.com/kotlin-programming/examples/current-date-time
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getUrlStringTemp() : String {
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val startDate = current.format(formatter)
+        val sevenDaysFromNow = current.plusDays(7)
+        val endDate = sevenDaysFromNow.format(formatter)
+        return myBaseUrl + "feed?start_date=" + startDate.toString() + "&end_date=" + endDate.toString() +
+                "&api_key=" + apiKey.API_KEY
+    }
 }

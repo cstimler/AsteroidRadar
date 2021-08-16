@@ -25,6 +25,10 @@ class AsteroidsRepository(private val database: AsteroidsDatabase) {
 
     private val myBaseUrl = "https://api.nasa.gov/neo/rest/v1/"
 
+    init {
+
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun refreshAsteroids() {
         withContext(Dispatchers.IO)

@@ -25,6 +25,16 @@ fun bindDetailsStatusImage(imageView: ImageView, isHazardous: Boolean) {
     }
 }
 
+@BindingAdapter("asteroidContentDescription")
+fun bindContentDescription(imageView: ImageView, isHazardous: Boolean) {
+    if (isHazardous) {
+        imageView.contentDescription="This asteroid is hazardous, beware!"
+    } else
+    {
+        imageView.contentDescription="This asteroid isn't dangerous, relax!"
+    }
+}
+
 @BindingAdapter("astronomicalUnitText")
 fun bindTextViewToAstronomicalUnit(textView: TextView, number: Double) {
     val context = textView.context

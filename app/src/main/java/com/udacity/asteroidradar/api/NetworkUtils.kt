@@ -10,6 +10,7 @@ import com.udacity.asteroidradar.Constants
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -18,6 +19,7 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 fun parseAsteroidsJsonResult(jsonResult: JSONObject): List<Asteroid> {
@@ -132,9 +134,18 @@ private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
     .build()
 
+// Obtained below code from: https://knowledge.udacity.com/questions/504005#506506
+
+val client: OkHttpClient = OkHttpClient().newBuilder()
+    .connectTimeout(30, TimeUnit.SECONDS)
+    .readTimeout(30, TimeUnit.SECONDS)
+    .writeTimeout(30, TimeUnit.SECONDS)
+    .build()
+
 object NetworkScalar {
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.nasa.gov/neo/rest/v1/")
+        .client(client)
         .addConverterFactory(ScalarsConverterFactory.create())
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()

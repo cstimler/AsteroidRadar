@@ -57,7 +57,6 @@ class MainFragment : Fragment() {
         binding.asteroidRecycler.adapter = AsteroidAdapter(AsteroidAdapter.OnClickListener {
             viewModel.displayAsteroidDetails(it)
         })
-
         setHasOptionsMenu(true)
 
         viewModel.navigateToSelectedAsteroid.observe(viewLifecycleOwner, Observer {

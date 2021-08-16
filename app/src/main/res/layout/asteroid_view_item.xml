@@ -9,31 +9,56 @@
             type="com.udacity.asteroidradar.Asteroid" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:orientation="vertical" >
+        android:background="@color/app_background">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="0.9"
+        android:layout_height="wrap_content"
         android:textColor="#F00"
         android:text="@{asteroid.codename}"
-        android:textSize="30sp"/>
+        android:textSize="30sp"
+        />
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity = "bottom"
+                app:asteroidContentDescription="@{asteroid.potentiallyHazardous}"
+                app:statusIcon="@{asteroid.potentiallyHazardous}" />
+
+        </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:textColor="#F00"
         android:text="@{asteroid.closeApproachDate}"
         android:textSize="30sp"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:textColor="#FFF"
-            android:text="@string/dashed_line"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:textColor="#FFF"
+                android:text="@string/dashed_line" />
 
-</LinearLayout>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
